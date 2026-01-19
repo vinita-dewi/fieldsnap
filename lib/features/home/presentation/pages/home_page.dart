@@ -64,18 +64,19 @@ class HomePage extends GetView<HomeController> {
                 title: 'Users',
                 route: AppRoutes.users,
               ),
+
+              Gap.h(20),
+              _buildMenu(
+                icon: Icons.camera_alt_outlined,
+                title: 'Camera',
+                route: AppRoutes.camera,
+              ),
               Gap.h(20),
 
               _buildMenu(
                 icon: Icons.location_on_outlined,
                 title: 'Location',
                 route: AppRoutes.location,
-              ),
-              Gap.h(20),
-              _buildMenu(
-                icon: Icons.camera_alt_outlined,
-                title: 'Camera',
-                route: AppRoutes.camera,
               ),
             ],
           ),
