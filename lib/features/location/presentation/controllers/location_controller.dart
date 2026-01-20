@@ -62,6 +62,10 @@ class LocationController extends GetxController {
   set selVillage(Village? x) => _selVillage.value = x;
 
   TextEditingController postalController = TextEditingController();
+  TextEditingController provinceController = TextEditingController();
+  TextEditingController regencyController = TextEditingController();
+  TextEditingController districtController = TextEditingController();
+  TextEditingController villageController = TextEditingController();
 
   final Rx<FetchState> _provinceFetchState = FetchState.idle.obs;
   FetchState get provinceFetchState => _provinceFetchState.value;
@@ -172,6 +176,16 @@ class LocationController extends GetxController {
     _selProvince.value = prov;
     _log.i('selProvince : ${_selProvince.value}');
     if (prov != null) {
+      regencyController.clear();
+      _regency.value = [];
+      _selRegency.value = null;
+      districtController.clear();
+      _district.value = [];
+      _selDistrict.value = null;
+      villageController.clear();
+      _village.value = [];
+      _selVillage.value = null;
+      postalController.clear();
       fetchRegencies(prov.code);
     }
   }
@@ -179,6 +193,13 @@ class LocationController extends GetxController {
   onSelectRegency(Regency? reg) {
     _selRegency.value = reg;
     if (reg != null) {
+      districtController.clear();
+      _district.value = [];
+      _selDistrict.value = null;
+      villageController.clear();
+      _village.value = [];
+      _selVillage.value = null;
+      postalController.clear();
       fetchDistricts(reg.code);
     }
   }
@@ -186,14 +207,19 @@ class LocationController extends GetxController {
   onSelectDistrict(District? dis) {
     _selDistrict.value = dis;
     if (dis != null) {
+      villageController.clear();
+      _village.value = [];
+      _selVillage.value = null;
+      postalController.clear();
       fetchVillages(dis.code);
     }
   }
 
   onSelectVillage(Village? vil) {
     _selVillage.value = vil;
+    postalController.clear();
     if (vil != null) {
-      fetchPostal(vil.code);
+      fetchPostal(vil.name);
     }
   }
 }

@@ -110,14 +110,21 @@ class LocationRemoteDataSourceImpl implements LocationRemoteDataSource {
   }
 
   @override
-  Future<List<String>> getPostal(String code) async {
+  Future<List<String>> getPostal(String villageName) async {
     try {
-      final path = ApiConstants.getPostal.replaceAll(':code:', code);
-      final response = await apiService.request(path: path, useApiKey: true);
+      final path = ApiConstants.getPostal;
+      final response = await apiService.request(
+        path: path,
+        useApiKey: true,
+        queryParameters: {'search': villageName},
+      );
       final data = (response.data as Map<String, dynamic>?)?['data'];
-      final postalCodes = (data as Map<String, dynamic>?)?['postal_codes'];
+      final postalCodes = (data as Map<String, dynamic>?)?['postalCodes'];
       if (postalCodes is List) {
-        return postalCodes.map((value) => value.toString()).toList();
+        return postalCodes
+            .whereType<Map<String, dynamic>>()
+            .map((item) => item['code'].toString())
+            .toList();
       }
       return const [];
     } catch (e) {

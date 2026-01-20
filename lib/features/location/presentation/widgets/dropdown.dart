@@ -7,9 +7,11 @@ class Dropdown<T> extends StatelessWidget {
   final T? initialSelection;
   final bool? enabled;
   final String? hintText;
+  final TextEditingController controller;
 
   const Dropdown({
     super.key,
+    required this.controller,
     required this.dataSet,
     required this.labelBuilder,
     this.onSelected,
@@ -20,8 +22,10 @@ class Dropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
+    return SizedBox(
+      width: double.infinity,
       child: DropdownMenu<T>(
+        controller: controller,
         hintText: hintText,
         enabled: enabled ?? true,
         initialSelection: initialSelection,

@@ -7,5 +7,5 @@ class ApiConstants {
   static String getCity = '$locApi/regional/indonesia/regencies';
   static String getDistrict = '$locApi/regional/indonesia/districts';
   static String getVillage = '$locApi/regional/indonesia/villages';
-  static String getPostal = '$locApi/regional/indonesia/villages/:village_id';
+  static String getPostal = 'https://carikodepos.id/api/postal-codes';
 }

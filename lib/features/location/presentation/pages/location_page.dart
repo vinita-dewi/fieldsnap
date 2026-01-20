@@ -24,14 +24,17 @@ class LocationPage extends GetView<LocationController> {
             Obx(
               () => Row(
                 children: [
-                  Dropdown(
-                    enabled:
-                        controller.provinceFetchState != FetchState.loading &&
-                        controller.province.isNotEmpty,
-                    dataSet: controller.province,
-                    labelBuilder: (prov) => prov.name,
-                    initialSelection: controller.selProvince,
-                    onSelected: controller.onSelectProvince,
+                  Expanded(
+                    child: Dropdown(
+                      controller: controller.provinceController,
+                      enabled:
+                          controller.provinceFetchState != FetchState.loading &&
+                          controller.province.isNotEmpty,
+                      dataSet: controller.province,
+                      labelBuilder: (prov) => prov.name,
+                      initialSelection: controller.selProvince,
+                      onSelected: controller.onSelectProvince,
+                    ),
                   ),
                   if (controller.provinceFetchState == FetchState.loading) ...[
                     Padding(
@@ -46,14 +49,17 @@ class LocationPage extends GetView<LocationController> {
             Obx(
               () => Row(
                 children: [
-                  Dropdown(
-                    enabled:
-                        controller.regencyFetchState != FetchState.loading &&
-                        controller.regency.isNotEmpty,
-                    dataSet: controller.regency,
-                    labelBuilder: (reg) => reg.name,
-                    initialSelection: controller.selRegency,
-                    onSelected: controller.onSelectRegency,
+                  Expanded(
+                    child: Dropdown(
+                      controller: controller.regencyController,
+                      enabled:
+                          controller.regencyFetchState != FetchState.loading &&
+                          controller.regency.isNotEmpty,
+                      dataSet: controller.regency,
+                      labelBuilder: (reg) => reg.name,
+                      initialSelection: controller.selRegency,
+                      onSelected: controller.onSelectRegency,
+                    ),
                   ),
                 ],
               ),
@@ -63,14 +69,17 @@ class LocationPage extends GetView<LocationController> {
             Obx(
               () => Row(
                 children: [
-                  Dropdown(
-                    enabled:
-                        controller.districtFetchState != FetchState.loading &&
-                        controller.district.isNotEmpty,
-                    dataSet: controller.district,
-                    labelBuilder: (dis) => dis.name,
-                    initialSelection: controller.selDistrict,
-                    onSelected: controller.onSelectDistrict,
+                  Expanded(
+                    child: Dropdown(
+                      controller: controller.districtController,
+                      enabled:
+                          controller.districtFetchState != FetchState.loading &&
+                          controller.district.isNotEmpty,
+                      dataSet: controller.district,
+                      labelBuilder: (dis) => dis.name,
+                      initialSelection: controller.selDistrict,
+                      onSelected: controller.onSelectDistrict,
+                    ),
                   ),
                 ],
               ),
@@ -80,14 +89,17 @@ class LocationPage extends GetView<LocationController> {
             Obx(
               () => Row(
                 children: [
-                  Dropdown(
-                    enabled:
-                        controller.villageFetchState != FetchState.loading &&
-                        controller.village.isNotEmpty,
-                    dataSet: controller.village,
-                    labelBuilder: (vil) => vil.name,
-                    initialSelection: controller.selVillage,
-                    onSelected: controller.onSelectVillage,
+                  Expanded(
+                    child: Dropdown(
+                      controller: controller.villageController,
+                      enabled:
+                          controller.villageFetchState != FetchState.loading &&
+                          controller.village.isNotEmpty,
+                      dataSet: controller.village,
+                      labelBuilder: (vil) => vil.name,
+                      initialSelection: controller.selVillage,
+                      onSelected: controller.onSelectVillage,
+                    ),
                   ),
                 ],
               ),
