@@ -1,3 +1,5 @@
+import 'package:fieldsnap/core/theme/app_colors.dart';
+import 'package:fieldsnap/core/theme/app_text_styles.dart';
 import 'package:flutter/material.dart';
 
 class Dropdown<T> extends StatelessWidget {
@@ -26,10 +28,18 @@ class Dropdown<T> extends StatelessWidget {
       width: double.infinity,
       child: DropdownMenu<T>(
         controller: controller,
+        expandedInsets: EdgeInsets.zero,
         hintText: hintText,
         enabled: enabled ?? true,
         initialSelection: initialSelection,
         onSelected: onSelected,
+        textStyle: AppTextStyles.textTheme.bodyLarge,
+        inputDecorationTheme: InputDecorationTheme(
+          hintStyle: AppTextStyles.textTheme.bodyLarge!(
+            color: AppColors.textSecondary,
+          ),
+        ),
+        trailingIcon: Icon(Icons.keyboard_arrow_down),
         dropdownMenuEntries: dataSet
             .map(
               (item) =>

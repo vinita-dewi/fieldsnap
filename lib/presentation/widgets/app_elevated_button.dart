@@ -20,6 +20,7 @@ class AppElevatedButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         textStyle: AppTextStyles.textTheme.labelLarge?.copyWith(
           color: AppColors.onPrimary,
         ),
@@ -32,9 +33,6 @@ class AppElevatedButton extends StatelessWidget {
       return button;
     }
 
-    return SizedBox(
-      width: double.infinity,
-      child: button,
-    );
+    return SizedBox(width: double.infinity, child: button);
   }
 }

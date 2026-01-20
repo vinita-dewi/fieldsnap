@@ -113,6 +113,7 @@ class LocationRemoteDataSourceImpl implements LocationRemoteDataSource {
   Future<List<String>> getPostal(String villageName) async {
     try {
       final path = ApiConstants.getPostal;
+      final normalizedVillage = villageName.trim().toLowerCase();
       final response = await apiService.request(
         path: path,
         useApiKey: true,
@@ -123,6 +124,14 @@ class LocationRemoteDataSourceImpl implements LocationRemoteDataSource {
       if (postalCodes is List) {
         return postalCodes
             .whereType<Map<String, dynamic>>()
+            .where((item) {
+              final village = item['village'];
+              if (village is Map<String, dynamic>) {
+                final name = village['name']?.toString().trim().toLowerCase();
+                return name == normalizedVillage;
+              }
+              return false;
+            })
             .map((item) => item['code'].toString())
             .toList();
       }

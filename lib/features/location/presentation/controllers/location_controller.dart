@@ -11,8 +11,9 @@ import 'package:fieldsnap/features/location/domain/entities/regency.dart';
 import 'package:fieldsnap/features/location/domain/entities/district.dart';
 import 'package:fieldsnap/features/location/domain/entities/village.dart';
 import 'package:flutter/widgets.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class LocationController extends GetxController {
   LocationController({
@@ -29,7 +30,7 @@ class LocationController extends GetxController {
   final GetVillage getVillage;
   final GetPostal getPostal;
 
-  PermissionStatus? _locPermission;
+  LocationPermission? _locPermission;
   final _log = AppLogger.instance;
   bool _isRequestingPermission = false;
 
@@ -67,6 +68,9 @@ class LocationController extends GetxController {
   TextEditingController districtController = TextEditingController();
   TextEditingController villageController = TextEditingController();
 
+  final Rx<FetchState> _fetchState = FetchState.idle.obs;
+  FetchState get fetchState => _fetchState.value;
+
   final Rx<FetchState> _provinceFetchState = FetchState.idle.obs;
   FetchState get provinceFetchState => _provinceFetchState.value;
 
@@ -86,7 +90,7 @@ class LocationController extends GetxController {
   void onInit() {
     super.onInit();
     _log.i('[LOCATION CONTROLLER - onInit]');
-    requestPermisison();
+
     initDropdown();
   }
 
@@ -99,8 +103,8 @@ class LocationController extends GetxController {
       return;
     }
     _isRequestingPermission = true;
-    _locPermission = await Permission.location.request();
-    if (_locPermission == PermissionStatus.permanentlyDenied) {
+    _locPermission = await Geolocator.requestPermission();
+    if (_locPermission == LocationPermission.deniedForever) {
       await AppSettings.openAppSettings();
     }
     _log.i(
@@ -170,6 +174,97 @@ class LocationController extends GetxController {
     } finally {
       _postalFetchState.value = FetchState.idle;
     }
+  }
+
+  Future<void> autoFillForm() async {
+    try {
+      _fetchState.value = FetchState.loading;
+      requestPermisison();
+      final LocationSettings locationSettings = LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 100,
+      );
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: locationSettings,
+      );
+
+      _log.i('[LOCATION CONTROLLER - autoFillForm] position : $position');
+
+      final placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      _log.i('[LOCATION CONTROLLER - autoFillForm] placemarks : $placemarks');
+
+      if (placemarks.isNotEmpty) {
+        Placemark pm = placemarks.first;
+
+        List<Province> tempProv = _province
+            .where(
+              (e) =>
+                  e.name.toLowerCase() == pm.administrativeArea?.toLowerCase(),
+            )
+            .toList();
+        if (tempProv.isNotEmpty) {
+          _selProvince.value = tempProv.first;
+          fetchRegencies(_selProvince.value!.code);
+
+          List<Regency> tempRegency = _regency
+              .where(
+                (e) =>
+                    e.name.toLowerCase() ==
+                    pm.subAdministrativeArea?.toLowerCase(),
+              )
+              .toList();
+
+          if (tempRegency.isNotEmpty) {
+            _selRegency.value = tempRegency.first;
+            fetchDistricts(_selRegency.value!.code);
+
+            List<District> tempDistrict = _district
+                .where(
+                  (e) => e.name.toLowerCase() == pm.locality?.toLowerCase(),
+                )
+                .toList();
+
+            if (tempDistrict.isNotEmpty) {
+              _selDistrict.value = tempDistrict.first;
+              fetchVillages(_selDistrict.value!.code);
+
+              List<Village> tempVillage = _village
+                  .where(
+                    (e) =>
+                        e.name.toLowerCase() == pm.subLocality?.toLowerCase(),
+                  )
+                  .toList();
+
+              _selVillage.value = tempVillage.first;
+            }
+          }
+        }
+        postalController.text = pm.postalCode ?? '';
+      }
+    } catch (e) {
+      _log.e('[LOCATION CONTROLLER - autoFillForm] ERROR : $e');
+    } finally {
+      _fetchState.value = FetchState.idle;
+    }
+  }
+
+  clearForm() {
+    _selProvince.value = null;
+    provinceController.clear();
+    regencyController.clear();
+    _regency.value = [];
+    _selRegency.value = null;
+    districtController.clear();
+    _district.value = [];
+    _selDistrict.value = null;
+    villageController.clear();
+    _village.value = [];
+    _selVillage.value = null;
+    postalController.clear();
   }
 
   onSelectProvince(Province? prov) {

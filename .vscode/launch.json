@@ -7,6 +7,13 @@
         {
             "name": "fieldsnap",
             "request": "launch",
+            "type": "dart",
+            "deviceId": "a8a761c4"
+          },
+    
+        {
+            "name": "fieldsnap",
+            "request": "launch",
             "type": "dart"
         },
         {
