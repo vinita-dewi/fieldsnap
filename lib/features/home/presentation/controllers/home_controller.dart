@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import 'package:fieldsnap/core/enums/fetch_state.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class HomeController extends GetxController {
   final Rx<FetchState> _fetchState = FetchState.idle.obs;
@@ -9,7 +8,6 @@ class HomeController extends GetxController {
 
   @override
   void onInit() {
-    // TODO: implement onInit
     super.onInit();
   }
 }
