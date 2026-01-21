@@ -1,7 +1,7 @@
 class ApiConstants {
   ApiConstants._();
 
-  static String getUsers = 'https://dummyapi.io/data/v1/user';
+  static String getUsers = 'https://dummyjson.com/users';
   static String locApi = 'https://use.api.co.id';
   static String getProvince = '$locApi/regional/indonesia/provinces';
   static String getCity = '$locApi/regional/indonesia/regencies';
