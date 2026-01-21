@@ -123,18 +123,6 @@ Run with coverage:
 flutter test --coverage
 ```
 
-Generate HTML report (Windows):
-
-```powershell
-& "C:\ProgramData\chocolatey\lib\lcov\tools\bin\genhtml" coverage/lcov.info -o coverage/html
-```
-
-Open the report:
-
-```powershell
-& "$env:ProgramFiles(x86)\Microsoft\Edge\Application\msedge.exe" "coverage/html/index.html"
-```
-
 Coverage snapshot (from `coverage/html/index.html` on 2026-01-21):
 
 - Lines: 453 / 965 (46.9%)
