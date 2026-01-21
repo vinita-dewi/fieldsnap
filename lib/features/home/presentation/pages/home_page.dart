@@ -11,7 +11,8 @@ import '../controllers/home_controller.dart';
 class HomePage extends GetView<HomeController> {
   const HomePage({super.key});
 
-  Widget _buildMenu({
+  Widget _buildMenu(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required String route,
@@ -21,7 +22,7 @@ class HomePage extends GetView<HomeController> {
         Get.toNamed(route);
       },
       child: Container(
-        width: MediaQuery.of(Get.context!).size.width * 0.5,
+        width: MediaQuery.of(context).size.width * 0.5,
         padding: EdgeInsets.all(40.px),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16.px),
@@ -61,6 +62,7 @@ class HomePage extends GetView<HomeController> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _buildMenu(
+                context,
                 icon: Icons.people_outline,
                 title: 'Users',
                 route: AppRoutes.users,
@@ -68,6 +70,7 @@ class HomePage extends GetView<HomeController> {
 
               Gap.h(20),
               _buildMenu(
+                context,
                 icon: Icons.camera_alt_outlined,
                 title: 'Camera',
                 route: AppRoutes.camera,
@@ -75,6 +78,7 @@ class HomePage extends GetView<HomeController> {
               Gap.h(20),
 
               _buildMenu(
+                context,
                 icon: Icons.location_on_outlined,
                 title: 'Location',
                 route: AppRoutes.location,
