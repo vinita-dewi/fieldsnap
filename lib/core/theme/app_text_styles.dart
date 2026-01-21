@@ -24,6 +24,15 @@ class AppTextStyles {
   );
 
   static TextStyle _nunito(double size, FontWeight weight, {Color? color}) {
+    if (const bool.fromEnvironment('FLUTTER_TEST')) {
+      return TextStyle(
+        fontSize: size,
+        fontWeight: weight,
+        color: color ?? AppColors.textPrimary,
+        height: 1.25,
+        letterSpacing: 0.1,
+      );
+    }
     return GoogleFonts.nunito(
       fontSize: size,
       fontWeight: weight,
