@@ -176,6 +176,28 @@ class LocationPage extends GetView<LocationController> {
                     ],
                   ),
                 ),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12.px),
+                    color: AppColors.primary.withAlpha(50),
+                  ),
+                  padding: EdgeInsets.all(16.px),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info, color: AppColors.primary, size: 16.px),
+                      Gap.w(16.px),
+                      Expanded(
+                        child: Text(
+                          'Deteksi lokasi tidak selalu akurat. Akibatnya, sebagian field bisa tidak terisi',
+                          style: AppTextStyles.textTheme.bodyMedium!(
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Gap.h(20),
 
                 AppElevatedButton(
                   label: 'Lacak Lokasi',

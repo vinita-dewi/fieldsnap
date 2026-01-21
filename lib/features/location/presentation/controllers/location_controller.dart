@@ -179,13 +179,19 @@ class LocationController extends GetxController {
   Future<void> autoFillForm() async {
     try {
       _fetchState.value = FetchState.loading;
-      requestPermisison();
+      await requestPermisison();
+      final LocationSettings androidLoc = AndroidSettings(
+        accuracy: LocationAccuracy.best,
+        distanceFilter: 100,
+        forceLocationManager: true,
+      );
+
       final LocationSettings locationSettings = LocationSettings(
         accuracy: LocationAccuracy.high,
         distanceFilter: 100,
       );
       Position position = await Geolocator.getCurrentPosition(
-        locationSettings: locationSettings,
+        locationSettings: GetPlatform.isAndroid ? androidLoc : locationSettings,
       );
 
       _log.i('[LOCATION CONTROLLER - autoFillForm] position : $position');
@@ -200,46 +206,35 @@ class LocationController extends GetxController {
       if (placemarks.isNotEmpty) {
         Placemark pm = placemarks.first;
 
-        List<Province> tempProv = _province
-            .where(
-              (e) =>
-                  e.name.toLowerCase() == pm.administrativeArea?.toLowerCase(),
-            )
-            .toList();
-        if (tempProv.isNotEmpty) {
-          _selProvince.value = tempProv.first;
-          fetchRegencies(_selProvince.value!.code);
+        final Province? matchedProvince = _bestMatchByName(
+          _province,
+          pm.administrativeArea,
+        );
+        if (matchedProvince != null) {
+          _selProvince.value = matchedProvince;
+          await fetchRegencies(_selProvince.value!.code);
 
-          List<Regency> tempRegency = _regency
-              .where(
-                (e) =>
-                    e.name.toLowerCase() ==
-                    pm.subAdministrativeArea?.toLowerCase(),
-              )
-              .toList();
+          final Regency? matchedRegency = _bestMatchByName(
+            _regency,
+            pm.subAdministrativeArea,
+          );
+          if (matchedRegency != null) {
+            _selRegency.value = matchedRegency;
+            await fetchDistricts(_selRegency.value!.code);
 
-          if (tempRegency.isNotEmpty) {
-            _selRegency.value = tempRegency.first;
-            fetchDistricts(_selRegency.value!.code);
+            final District? matchedDistrict = _bestMatchByName(
+              _district,
+              pm.locality,
+            );
+            if (matchedDistrict != null) {
+              _selDistrict.value = matchedDistrict;
+              await fetchVillages(_selDistrict.value!.code);
 
-            List<District> tempDistrict = _district
-                .where(
-                  (e) => e.name.toLowerCase() == pm.locality?.toLowerCase(),
-                )
-                .toList();
-
-            if (tempDistrict.isNotEmpty) {
-              _selDistrict.value = tempDistrict.first;
-              fetchVillages(_selDistrict.value!.code);
-
-              List<Village> tempVillage = _village
-                  .where(
-                    (e) =>
-                        e.name.toLowerCase() == pm.subLocality?.toLowerCase(),
-                  )
-                  .toList();
-
-              _selVillage.value = tempVillage.first;
+              final Village? matchedVillage = _bestMatchByName(
+                _village,
+                pm.subLocality,
+              );
+              _selVillage.value = matchedVillage;
             }
           }
         }
@@ -316,5 +311,158 @@ class LocationController extends GetxController {
     if (vil != null) {
       fetchPostal(vil.name);
     }
+  }
+
+  String _normalizeName(String? value) {
+    if (value == null) {
+      return '';
+    }
+    String v = value.toLowerCase().trim();
+    v = v.replaceAll(RegExp(r'[^\w\s]'), ' ');
+    v = v.replaceAll(RegExp(r'\s+'), ' ');
+    v = v.replaceAll(RegExp(r'\bdaerah khusus ibukota\b'), 'dki');
+    v = v.replaceAll(RegExp(r'\b(kab|kabupaten|kota)\b'), '');
+    v = v.replaceAll(RegExp(r'\b(kec|kecamatan)\b'), '');
+    v = v.replaceAll(RegExp(r'\b(kel|kelurahan|desa)\b'), '');
+    v = v.replaceAll(RegExp(r'\b(kel\.|kec\.)\b'), '');
+    return v.trim();
+  }
+
+  String _normalizeSignal(String? value) {
+    if (value == null) {
+      return '';
+    }
+    String v = value.toLowerCase().trim();
+    v = v.replaceAll(RegExp(r'[^\w\s]'), ' ');
+    v = v.replaceAll(RegExp(r'\s+'), ' ');
+    return v.trim();
+  }
+
+  String? _extractAreaType(String value) {
+    if (RegExp(r'\bkab\b|\bkabupaten\b').hasMatch(value)) {
+      return 'kabupaten';
+    }
+    if (RegExp(r'\bkota\b').hasMatch(value)) {
+      return 'kota';
+    }
+    return null;
+  }
+
+  String? _extractDirection(String value) {
+    if (RegExp(r'\bselatan\b').hasMatch(value)) {
+      return 'selatan';
+    }
+    if (RegExp(r'\butara\b').hasMatch(value)) {
+      return 'utara';
+    }
+    if (RegExp(r'\btimur\b').hasMatch(value)) {
+      return 'timur';
+    }
+    if (RegExp(r'\bbarat\b').hasMatch(value)) {
+      return 'barat';
+    }
+    return null;
+  }
+
+  T? _bestMatchByName<T extends Object>(List<T> items, String? placemarkName) {
+    final String targetSignal = _normalizeSignal(placemarkName);
+    if (targetSignal.isEmpty) {
+      return null;
+    }
+    final String target = _normalizeName(targetSignal);
+    final String? targetType = _extractAreaType(targetSignal);
+    final String? targetDirection = _extractDirection(targetSignal);
+
+    int bestScore = 1 << 30;
+    T? bestItem;
+    int bestTie = -1;
+
+    for (final item in items) {
+      final String rawName = (item as dynamic).name as String? ?? '';
+      final String nameSignal = _normalizeSignal(rawName);
+      final String name = _normalizeName(nameSignal);
+      if (name.isEmpty) {
+        continue;
+      }
+      if (name == target) {
+        return item;
+      }
+
+      final String? nameType = _extractAreaType(nameSignal);
+      final String? nameDirection = _extractDirection(nameSignal);
+      int tieScore = 0;
+      if (targetType != null && nameType == targetType) {
+        tieScore += 2;
+      }
+      if (targetDirection != null && nameDirection == targetDirection) {
+        tieScore += 1;
+      }
+
+      if (name.contains(target) || target.contains(name)) {
+        if (tieScore > bestTie || (tieScore == bestTie && bestScore > 0)) {
+          bestScore = 0;
+          bestTie = tieScore;
+          bestItem = item;
+        }
+        continue;
+      }
+
+      final int distance = _levenshtein(name, target);
+      if (distance < bestScore ||
+          (distance == bestScore && tieScore > bestTie)) {
+        bestScore = distance;
+        bestTie = tieScore;
+        bestItem = item;
+      }
+    }
+
+    if (bestItem == null) {
+      return null;
+    }
+
+    final int maxLen = target.length;
+    if (bestScore > (maxLen <= 6 ? 2 : 3)) {
+      return null;
+    }
+
+    return bestItem;
+  }
+
+  int _levenshtein(String s, String t) {
+    if (s == t) {
+      return 0;
+    }
+    if (s.isEmpty) {
+      return t.length;
+    }
+    if (t.isEmpty) {
+      return s.length;
+    }
+
+    final List<int> v0 = List<int>.generate(t.length + 1, (i) => i);
+    final List<int> v1 = List<int>.filled(t.length + 1, 0);
+
+    for (int i = 0; i < s.length; i++) {
+      v1[0] = i + 1;
+      for (int j = 0; j < t.length; j++) {
+        final int cost = s[i] == t[j] ? 0 : 1;
+        v1[j + 1] = _min3(v1[j] + 1, v0[j + 1] + 1, v0[j] + cost);
+      }
+      for (int j = 0; j < v0.length; j++) {
+        v0[j] = v1[j];
+      }
+    }
+
+    return v1[t.length];
+  }
+
+  int _min3(int a, int b, int c) {
+    if (a <= b && a <= c) {
+      return a;
+    }
+    if (b <= a && b <= c) {
+      return b;
+    }
+    return c;
   }
 }
