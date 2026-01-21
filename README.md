@@ -135,6 +135,12 @@ Open the report:
 & "$env:ProgramFiles(x86)\Microsoft\Edge\Application\msedge.exe" "coverage/html/index.html"
 ```
 
+Coverage snapshot (from `coverage/html/index.html` on 2026-01-21):
+
+- Lines: 453 / 965 (46.9%)
+- Functions: 0 / 0 (n/a)
+- Lowest coverage areas: `core/theme`, `presentation/widgets`, and `features/*/presentation/pages`
+
 ## Troubleshooting
 
 - If location auto-fill is inaccurate, check GPS accuracy and network.
